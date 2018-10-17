@@ -1,0 +1,15 @@
+{
+  "db": "cwp-12",
+  "login": "cwp_12",
+  "password": "cwp_12",
+  "port": 1433,
+  "host": "ANDREICHAYEUSKI",
+  "dialect": "mssql",
+  "dialectOptions": {
+    "instanceName": "MSSQLSERVER"
+  },
+  "define": {
+    "timestamps": true,
+    "paranoid": true
+  }
+}

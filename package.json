@@ -1,0 +1,8 @@
+{
+  "name": "cwp-10",
+  "author": "Andrei Chayeuski",
+  "dependencies": {
+    "sequelize": "^4.39.0",
+    "tedious": "^2.6.4"
+  }
+}
