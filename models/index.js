@@ -1,9 +1,5 @@
-const Fleet = require('./fleets');
-const Vehicle = require('./vehicles');
-const Motion = require('./motions');
-
 module.exports = (Sequelize, config) => {
-	let sequelize = new Sequelize(config.db, config.login, config.password,
+	const sequelize = new Sequelize(config.db, config.login, config.password,
 		{
 			dialect: config.dialect,
 			host: config.host,
@@ -11,38 +7,23 @@ module.exports = (Sequelize, config) => {
 			options: {
 				instanceName: config.dialectOptions.instanceName
 			},
-			logging: false,
-			define: config.define
+			define: {
+				timestamps: true,
+				paranoid: true
+			},
 		});
 
+	const Fleet = require('../models/fleets')(Sequelize, sequelize);
+	const Motion = require('../models/motions')(Sequelize, sequelize);
+	const Vehicle = require('../models/vehicles')(Sequelize, sequelize);
 
-	sequelize.authenticate().then(() => {
-		console.log('Success initialization');
-	}).catch((err) => {
-		console.log(`Error connect ${err}`);
-	});
+	Motion.hasMany(Vehicle, {foreignKey: 'vehicleId'});
+	console.log("1111111111111111111111");
 
-	const fleets = Fleet(Sequelize, sequelize);
-	const vehicles = Vehicle(Sequelize, sequelize);
-	const motions = Motion(Sequelize, sequelize);
-
-
-	vehicles.belongsTo(fleets, {
-		foreignKey: 'fleetId',
-		as: 'fleet'
-	});
-
-	motions.belongsTo(vehicles, {
-		foreignKey: 'vehicleId',
-		as: 'vehicle'
-	});
-
+	Vehicle.hasMany(Fleet, {foreignKey: 'fleetId'});
 
 	return {
-		fleets,
-		vehicles,
-		motions,
-
+		Fleet, Motion, Vehicle,
 		sequelize: sequelize,
 		Sequelize: Sequelize,
 	};
