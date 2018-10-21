@@ -1,5 +1,4 @@
 module.exports.valid = function(req) {
-	let res = false;
 	req.url = req.originalUrl;
 	let errorMsg = "";
 	console.log(req.method);
@@ -34,6 +33,15 @@ module.exports.valid = function(req) {
 					}
 					break;
 				}
+				case 'milage':
+				{
+					console.log((req.params.id));
+					if (!(parseInt(req.params.id, 10) > 0))
+					{
+						errorMsg += "error: id argument is not valid\n";
+					}
+					break;
+				}
 			}
 			break;
 		}
@@ -47,7 +55,7 @@ module.exports.valid = function(req) {
 					{
 						case "fleets":
 						{
-							if (req.body.name === undefined)
+							if (!req.body.name)
 							{
 								errorMsg += "error: name is not found\n";
 							}
@@ -61,50 +69,41 @@ module.exports.valid = function(req) {
 							}
 							if (!req.body.longitude)
 							{
-								errorMsg += "error: longitude is not found";
+								errorMsg += "error: longitude is not found\n";
 							}
 							if (!req.body.time)
 							{
-								errorMsg += "error: time is not found";
+								errorMsg += "error: time is not found\n";
 							}
-							if (!req.body.vehicleId)
+							if (!(parseInt(req.body.vehicleId, 10) > 0))
 							{
-								errorMsg += "error: vehicleId is not found";
+								errorMsg += "error: vehicleId argument is not valid\n";
 							}
 							break;
 						}
 						case "vehicles":
 						{
-
+							if (!req.body.name)
+							{
+								errorMsg += "error: name is not found\n";
+							}
+							if (!(parseInt(req.body.fleetId, 10) > 0))
+							{
+								errorMsg += "error: fleetId argument is not valid\n";
+							}
 							break;
 						}
 					}
 					break;
 				}
 				case 'delete':
-					if (payload.id !== undefined)
-						res = true;
-					break;
-				case 'update':
-					if (payload.name !== undefined && payload.birth !== undefined
-						&& payload.films !== undefined && payload.liked !== undefined
-						&& payload.photo !== undefined)
+				{
+					if (!(parseInt(req.body.id, 10) > 0))
 					{
-						if ((payload.liked > 0 || payload.liked === null)
-							&& (payload.films > 0 || payload.films === null))
-						{
-							res = true;
-						}
+						errorMsg += "error: id argument is not valid\n";
 					}
 					break;
-				case '/api/actors/update':
-					if (payload.id !== undefined
-						&& (payload.liked > 0 || payload.liked === null || payload.liked === undefined)
-						&& (payload.films > 0 || payload.films === null || payload.films === undefined))
-					{
-						res = true;
-					}
-					break;
+				}
 			}
 			break;
 		}
@@ -112,7 +111,6 @@ module.exports.valid = function(req) {
 	if (errorMsg === "")
 	{
 		console.log("all is good");
-		res = true;
 	}
-	return { res, errorMsg };
+	return errorMsg;
 };

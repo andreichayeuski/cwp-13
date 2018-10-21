@@ -3,117 +3,183 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 const db = require('../db');
 
+const geolib = require('geolib');
+const valid = require("./valid").valid;
+
 router.use(bodyParser.json());
 
 router.get('/readall', (req, resp) => {
-	db.Vehicle.findAll({
-		where: {
-			fleetId: req.params.fleetId,
-			deletedAt: null
-		}
-	}).then((res) => {
-		if (!res)
-		{
-			resp.statusCode = 404;
-		}
-		else
-		{
-			resp.json(res);
-		}
-	});
+	let err = valid(req);
+	if (err === "")
+	{
+		db.Vehicle.findAll({
+			where: {
+				fleetId: req.params.fleetId,
+				deletedAt: null
+			}
+		}).then((res) => {
+			if (!res)
+			{
+				resp.statusCode = 404;
+			}
+			else
+			{
+				resp.json(res);
+			}
+		});
+	}
+	else
+	{
+		resp.json({ 'error': err });
+	}
 });
 
 router.get('/read', (req, resp) => {
-	db.Vehicle.findById(req.query.id).then((res) => {
-		if ((!res) || (res.deletedAt !== null))
-		{
-			resp.statusCode = 404;
-		}
-		else
-		{
-			resp.json(res);
-		}
-	});
+	let err = valid(req);
+	if (err === "")
+	{
+		db.Vehicle.findById(req.params.id).then((res) => {
+			console.log(res);
+			if ((!res) || (res.deletedAt !== null))
+			{
+				resp.statusCode = 404;
+			}
+			else
+			{
+				resp.json(res);
+			}
+		});
+	}
+	else
+	{
+		resp.json({ 'error': err });
+	}
 });
 
-router.post('/create', (req, resp, next) => {
-	req = req.body;
-	if (!req.name) resp.json({'error': '\"name\" arg not found'});
-	else if (!req.fleetId) resp.json({'error': '\"fleetId\" arg not found'});
-	else db.Fleet.findById(req.fleetId).then((res) => {
+router.post('/create', (req, resp) => {
+	let err = valid(req);
+	if (err === "")
+	{
+		db.Fleet.findById(req.body.fleetId).then((res) => {
 			if ((!res) || (res.deletedAt !== null)) {
 				resp.statusCode = 404;
-				next();
 			}
-			else db.Vehicle.create({'name': req.name, 'fleetId': req.fleetId}).then((res) => {
+			else db.Vehicle.create({
+				'name': req.body.name,
+				'fleetId': req.body.fleetId
+			}).then((res) => {
 				resp.json(res);
 			});
 		});
+	}
+	else
+	{
+		resp.json({ 'error': err });
+	}
 });
 
-router.post('/update', (req, resp, next) => {
-	req = req.body;
-	if (!req.id) resp.json({'error': '\"id\" arg not found'});
-	else if (!req.name) resp.json({'error': '\"name\" arg not found'});
-	else if (!req.fleetId) resp.json({'error': '\"fleetId\" arg not found'});
-	else db.Vehicle.update(
-			{ name: req.name, fleetId: req.fleetId },
+router.post('/update', (req, resp) => {
+	let err = valid(req);
+	if (err === "")
+	{
+		db.Vehicle.update(
+			{
+				name: req.body.name,
+				fleetId: req.body.fleetId
+			},
 			{
 				where: {
-					id: req.id,
+					id: req.body.id,
 					deletedAt: null
 				}
 			}
 		).then((res) => {
-			if (res == 0) {
+			console.log(res);
+			if (res == 0)
+			{
 				resp.statusCode = 400;
-				next();
 			}
-			else resp.json({ 'id': req.id, 'name': req.name, 'fleetId': req.fleetId });
+			else
+			{
+				resp.json(res);
+			}
 		});
+	}
+	else
+	{
+		resp.json({ 'error': err });
+	}
 });
 
-router.post('/delete', (req, resp, next) => {
-	req = req.body;
-	if (!req.id) resp.json({'error': '\"id\" arg not found'});
-	else db.Vehicle.findById(req.id).then((res) => {
-		if (!res) {
-			resp.statusCode = 400;
-			next();
-		}
-		else db.Fleet.destroy({
-			where: {
-				id: req.id,
-				deletedAt: null
+router.post('/delete', (req, resp) => {
+	let err = valid(req);
+	if (err === "")
+	{
+		db.Vehicle.findById(req.body.id).then((res) => {
+			console.log(res);
+			if (!res)
+			{
+				resp.statusCode = 400;
 			}
-		}).then(() => {
-			resp.json(res);
-		});
-	});
-});
-
-router.get('/milage', (req, resp, next) => {
-	if (!req.query.id) resp.json({'error': '\"id\" arg not found'});
-	else db.Vehicle.findById(req.query.id).then((res) => {
-		if ((!res) || (res.deletedAt !== null)) {
-			resp.statusCode = 404;
-			next();
-		}
-		else {
-			let coords = [];
-			let coordstime = [];
-			db.Motion.findAll({
+			else db.Fleet.destroy({
 				where: {
-					vehicleId: req.query.id
+					id: req.body.id,
+					deletedAt: null
 				}
-			}).then((res) => {
-				res.forEach((motion) => {
-					coords.push(motion.latLng);
-					coordstime.push(motion.latLngTime);
-				});
+			}).then(() => {
+				resp.json(res);
 			});
-		}
-	});
+		});
+	}
+	else
+	{
+		resp.json({ 'error': err });
+	}
+});
+
+router.get('/milage', (req, resp) => {
+	let err = valid(req);
+	if (err === "")
+	{
+		db.Vehicle.findById(req.params.id).then((res) => {
+			if ((!res) || (res.deletedAt !== null))
+			{
+				resp.statusCode = 404;
+			}
+			else {
+				let coords = [];
+				let coordstime = [];
+				db.Motion.findAll({
+					where: {
+						vehicleId: req.params.id
+					}
+				}).then((result) => {
+					result.forEach((motion) => {
+						coords.push(motion.latLng);
+						coordstime.push(motion.latLngTime);
+					});
+
+					let len = 0;
+					let spd = 0;
+					if (coords.length < 2) resp.json(len);
+					for (var i = 0; i < coords.length - 1; i++) {
+						len += geolib.getDistance(coords[i], coords[i+1]);
+						spd += geolib.getSpeed(coordstime[i], coordstime[i+1], {unit: 'mph'});
+					}
+
+					resp.json({
+						'getDistance': len,
+						'getPathLength': (coords.length < 2) ? 0 : geolib.getPathLength(coords),
+						'getAvgSpeed': Math.round(spd / (coordstime.length - 1))
+					});
+				});
+			}
+		});
+	}
+	else
+	{
+		resp.json({ 'error': err });
+	}
 });
 
 

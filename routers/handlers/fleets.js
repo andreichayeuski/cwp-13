@@ -3,7 +3,7 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 const db = require('../db');
 const valid = require("./valid").valid;
-const type = "fleets";
+
 router.use(bodyParser.json());
 
 router.get('/readall', (req, res) => {
@@ -13,11 +13,13 @@ router.get('/readall', (req, res) => {
 });
 
 router.get('/read/:id', (req, res) => {
-	if (valid(req, type))
+	let err = valid(req);
+	if (err === "")
 	{
 		console.log("readFleet");
 		db.Fleet.findById(req.params.id).then((result) => {
-			if ((!result) || (result.deletedAt !== null)) {
+			if ((!result) || (result.deletedAt !== null))
+			{
 				res.statusCode = 404;
 			}
 			else
@@ -28,12 +30,13 @@ router.get('/read/:id', (req, res) => {
 	}
 	else
 	{
-		res.json({'error': '\"id\" not found'});
+		res.json({ 'error': err });
 	}
 });
 
 router.post('/create', (req, res) => {
-	if (valid(req, type))
+	let err = valid(req);
+	if (err === "")
 	{
 		console.log("createFleet");
 		db.Fleet.create({'name': req.body.name}).then((result) => {
@@ -42,52 +45,67 @@ router.post('/create', (req, res) => {
 	}
 	else
 	{
-		res.json({'error': 'not all args founded'});
+		res.json({ 'error': err });
 	}
 });
 
 router.post('/update', (req, res) => {
-	req = req.body;
-	if (!req.id) {
-		res.json({'error': '\"id\" arg not found'});
-	}
-	else if (!req.name)
+	let err = valid(req);
+	if (err === "")
 	{
-		res.json({'error': '\"name\" arg not found'});
-	}
-	else db.Fleet.update(
+		db.Fleet.update(
 			{
-				'name': req.name
+				'name': req.body.name
 			},
 			{
 				where: {
-					id: req.id,
+					id: req.body.id,
 					deletedAt: null
 				}
 			}).then((result) => {
-			if (result == 0) {
-				res.statusCode = 400;
-			}
-			else res.json({ 'id': req.id, 'name': req.name });
+				console.log(result);
+				if (!result)
+				{
+					res.statusCode = 400;
+				}
+				else
+				{
+					res.json(result);
+				}
 		});
+	}
+	else
+	{
+		res.json({ 'error': err });
+	}
 });
 
 router.post('/delete', (req, res) => {
-	req = req.body;
-	if (!req.id) res.json({'error': '\"id\" arg not found'});
-	else db.Fleet.findById(req.id).then((result) => {
-		if (!result) {
-			res.statusCode = 400;
-		}
-		else db.Fleet.destroy({
-			where: {
-				id: req.id,
-				deletedAt: null
+	let err = valid(req);
+	if (err === "")
+	{
+		db.Fleet.findById(req.body.id).then((result) => {
+			if (!result)
+			{
+				res.statusCode = 400;
 			}
-		}).then(() => {
-			res.json(result);
+			else
+			{
+				db.Fleet.destroy({
+					where: {
+						id: req.body.id,
+						deletedAt: null
+					}
+				}).then(() => {
+					res.json(result);
+				});
+			}
 		});
-	});
+	}
+	else
+	{
+		res.json({ 'error': err });
+	}
 });
 
 module.exports = router;

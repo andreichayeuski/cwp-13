@@ -3,6 +3,7 @@
   "author": "Andrei Chayeuski",
   "dependencies": {
     "express": "^4.16.4",
+    "geolib": "^2.0.24",
     "sequelize": "^4.39.0",
     "tedious": "^2.6.4"
   }
