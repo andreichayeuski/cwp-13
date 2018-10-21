@@ -6,29 +6,33 @@ const valid = require("./valid").valid;
 
 router.use(bodyParser.json());
 
-router.post('/create', (req, resp) => {
+router.post('/create', (req, res) => {
 	let err = valid(req);
 	if (err === "")
 	{
-		db.Fleet.findById(req.body.fleetId).then((res) => {
-			if ((!res) || (res.deletedAt !== null))
+		db.Fleet.findById(req.body.fleetId).then((result) => {
+			if (result === null || result.deletedAt !== null)
 			{
-				resp.statusCode = 404;
+				console.log("404");
+				res.statusCode = 404;
+				res.json({error: "404 - not found"});
 			}
-			else db.Motion.create({
-				latitude: req.body.latitude,
-				longitude: req.body.longitude,
-				time: req.body.time,
-				vehicleId: req.body.vehicleId
-			}).then((result) => {
-				console.log(result);
-				resp.json(result);
-			});
+			else
+			{
+				db.Motion.create({
+					latitude: req.body.latitude,
+					longitude: req.body.longitude,
+					time: req.body.time,
+					vehicleId: req.body.vehicleId
+				}).then((result) => {
+					res.json(result);
+				});
+			}
 		});
 	}
 	else
 	{
-		resp.json({ 'error': err });
+		res.json({ 'error': err });
 	}
 });
 

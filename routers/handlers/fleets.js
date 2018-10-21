@@ -17,14 +17,16 @@ router.get('/read/:id', (req, res) => {
 	if (err === "")
 	{
 		console.log("readFleet");
-		db.Fleet.findById(req.params.id).then((result) => {
-			if ((!result) || (result.deletedAt !== null))
+		db.Fleet.findById(req.params.id).then((fleet) => {
+			if (res.length < 1 || res.deletedAt === null)
 			{
+				console.log("404");
 				res.statusCode = 404;
+				res.json({error: "404 - not found"});
 			}
 			else
 			{
-				res.json(result);
+				res.json(fleet);
 			}
 		});
 	}
@@ -39,8 +41,8 @@ router.post('/create', (req, res) => {
 	if (err === "")
 	{
 		console.log("createFleet");
-		db.Fleet.create({'name': req.body.name}).then((result) => {
-			res.json(result);
+		db.Fleet.create({'name': req.body.name}).then((fleet) => {
+			res.json(fleet);
 		});
 	}
 	else
@@ -64,13 +66,17 @@ router.post('/update', (req, res) => {
 				}
 			}).then((result) => {
 				console.log(result);
-				if (!result)
+				if (result.length < 1)
 				{
+					console.log("400");
 					res.statusCode = 400;
+					res.json({error: "400 - bad request"});
 				}
 				else
 				{
-					res.json(result);
+					db.Fleet.findById(req.body.id).then((fleet) => {
+						res.json(fleet);
+					});
 				}
 		});
 	}
@@ -87,7 +93,9 @@ router.post('/delete', (req, res) => {
 		db.Fleet.findById(req.body.id).then((result) => {
 			if (!result)
 			{
-				res.statusCode = 400;
+				console.log("400");
+				resp.statusCode = 400;
+				resp.json({error: "400 - bad request"});
 			}
 			else
 			{

@@ -15,7 +15,7 @@ module.exports.valid = function(req) {
 					console.log((req.params.id));
 					if (!(parseInt(req.params.id, 10) > 0))
 					{
-						errorMsg += "error: id argument is not valid\n";
+						errorMsg += "error: id argument is not valid; ";
 					}
 					break;
 				}
@@ -26,7 +26,7 @@ module.exports.valid = function(req) {
 						{
 							if (!(parseInt(req.params.fleetId, 10) > 0))
 							{
-								errorMsg += "error: fleetId argument is not valid\n";
+								errorMsg += "error: fleetId argument is not valid; ";
 							}
 							break;
 						}
@@ -38,7 +38,7 @@ module.exports.valid = function(req) {
 					console.log((req.params.id));
 					if (!(parseInt(req.params.id, 10) > 0))
 					{
-						errorMsg += "error: id argument is not valid\n";
+						errorMsg += "error: id argument is not valid; ";
 					}
 					break;
 				}
@@ -57,7 +57,7 @@ module.exports.valid = function(req) {
 						{
 							if (!req.body.name)
 							{
-								errorMsg += "error: name is not found\n";
+								errorMsg += "error: name is not found; ";
 							}
 							break;
 						}
@@ -65,19 +65,19 @@ module.exports.valid = function(req) {
 						{
 							if (!req.body.latitude)
 							{
-								errorMsg += 'error: latitude is not found\n';
+								errorMsg += 'error: latitude is not found; ';
 							}
 							if (!req.body.longitude)
 							{
-								errorMsg += "error: longitude is not found\n";
+								errorMsg += "error: longitude is not found; ";
 							}
 							if (!req.body.time)
 							{
-								errorMsg += "error: time is not found\n";
+								errorMsg += "error: time is not found; ";
 							}
 							if (!(parseInt(req.body.vehicleId, 10) > 0))
 							{
-								errorMsg += "error: vehicleId argument is not valid\n";
+								errorMsg += "error: vehicleId argument is not valid; ";
 							}
 							break;
 						}
@@ -85,11 +85,11 @@ module.exports.valid = function(req) {
 						{
 							if (!req.body.name)
 							{
-								errorMsg += "error: name is not found\n";
+								errorMsg += "error: name is not found; ";
 							}
 							if (!(parseInt(req.body.fleetId, 10) > 0))
 							{
-								errorMsg += "error: fleetId argument is not valid\n";
+								errorMsg += "error: fleetId argument is not valid; ";
 							}
 							break;
 						}
@@ -100,7 +100,15 @@ module.exports.valid = function(req) {
 				{
 					if (!(parseInt(req.body.id, 10) > 0))
 					{
-						errorMsg += "error: id argument is not valid\n";
+						errorMsg += "error: id argument is not valid; ";
+					}
+					break;
+				}
+				case 'update':
+				{
+					if (!(parseInt(req.body.id, 10) > 0))
+					{
+						errorMsg += "error: id argument is not valid; ";
 					}
 					break;
 				}
